@@ -22,6 +22,19 @@ export class Bullet extends Phaser.GameObjects.Image {
         //this.body.setVelocityX(Constants.Boy.bulletSpeed)
     }
 
+    shootStraight(direction: string) {
+        switch (direction) {
+            case 'left':
+                this.setRotation(Phaser.Math.PI2/2)
+                this.body.setVelocityX(-Constants.Boy.bulletSpeed)
+                break
+            default:
+                this.setRotation(0)
+                this.body.setVelocityX(Constants.Boy.bulletSpeed)
+                break
+        }
+    }
+
     reset(x: number, y: number) {
         this.setVisible(true)
         this.x = x

@@ -7,6 +7,7 @@ export class Boy extends SpineObject {
     state: State
     bullets: Phaser.GameObjects.Group
     lastShotTime: number
+    shootStraightKey: Phaser.Input.Keyboard.Key
     constructor(scene: Phaser.Scene, x: number, y: number, key?: string, animationName?: string, loop?: boolean) {
         super(scene, x, y, key, animationName, loop)
 
@@ -32,11 +33,11 @@ export class Boy extends SpineObject {
 
     }
 
-    initBullet(){
-        this.lastShotTime=this.scene.time.now
+    initBullet() {
+        this.lastShotTime = this.scene.time.now
 
-        this.bullets=this.scene.physics.add.group({
-            classType:Bullet
+        this.bullets = this.scene.physics.add.group({
+            classType: Bullet
         })
         // {
         //     classType:Bullet,
@@ -56,6 +57,9 @@ export class Boy extends SpineObject {
 
     initControl() {
         this.cursors = this.scene.input.keyboard.createCursorKeys()
+        this.shootStraightKey = this.scene.input.keyboard.addKey(
+            Phaser.Input.Keyboard.KeyCodes.SPACE
+        )
     }
     initPhysics() {
         //@ts-ignore
@@ -75,7 +79,7 @@ export class Boy extends SpineObject {
         this.spine.play('jump', true, true)
     }
 
-    goLeft(delta:number) {
+    goLeft(delta: number) {
         //@ts-ignore
         this.body.setVelocityX(-Constants.Boy.runSpeed)
 
@@ -99,7 +103,7 @@ export class Boy extends SpineObject {
     }
 
 
-    goRight(delta:number) {
+    goRight(delta: number) {
         //@ts-ignore
         this.body.setVelocityX(Constants.Boy.runSpeed)
 
@@ -133,31 +137,49 @@ export class Boy extends SpineObject {
         this.spine.play('jump', true, true)
     }
 
-    shoot(time:number){
-        if (time-this.lastShotTime>=1000/Constants.Boy.rateOfFire){
-            this.lastShotTime=time
-            var bullet=this.bullets.get(this.body.x,this.body.y,'texture','syringe.png')
-            if (bullet){
-                bullet.reset(this.body.x+this.body.width*Constants.Boy.gunOffset.x,this.body.y+this.body.width*Constants.Boy.gunOffset.y)
-                if(this.body.x<=this.scene.input.activePointer.worldX){
+    shoot(time: number) {
+        if (time - this.lastShotTime >= 1000 / Constants.Boy.rateOfFire) {
+            this.lastShotTime = time
+            var bullet = this.bullets.get(this.body.x, this.body.y, 'texture', 'syringe.png')
+            if (bullet) {
+                bullet.reset(this.body.x + this.body.width * Constants.Boy.gunOffset.x, this.body.y + this.body.width * Constants.Boy.gunOffset.y)
+                if (this.body.x <= this.scene.input.activePointer.worldX) {
                     this.setFlipX(false)
                 }
-                else{
+                else {
                     this.setFlipX(true)
                 }
                 bullet.shoot({
-                    x:this.scene.input.activePointer.worldX,
-                    y:this.scene.input.activePointer.worldY
+                    x: this.scene.input.activePointer.worldX,
+                    y: this.scene.input.activePointer.worldY
                 })
             }
         }
     }
 
-    infected(){
+    infected() {
         console.log('infected')
     }
 
-    update(time:number,delta:number) {
+    shootStraight(time: number) {
+        if (time - this.lastShotTime >= 1000 / Constants.Boy.rateOfFire) {
+            this.lastShotTime = time
+            var bullet = this.bullets.get(this.body.x, this.body.y, 'texture', 'syringe.png')
+            if (bullet) {
+                bullet.reset(this.body.x + this.body.width * Constants.Boy.gunOffset.x, this.body.y + this.body.width * Constants.Boy.gunOffset.y)
+                switch (this.flipX) {
+                    case true:
+                        bullet.shootStraight('left')
+                        break
+                    default:
+                        bullet.shootStraight('right')
+                        break
+                }
+            }
+        }
+    }
+
+    update(time: number, delta: number) {
         switch (this.state) {
             case State.Run:
                 //@ts-ignore
@@ -190,8 +212,11 @@ export class Boy extends SpineObject {
                     //@ts-ignore
                     this.body.setVelocityX(0)
                 }
-                if (this.scene.input.activePointer.isDown){
+                if (this.scene.input.activePointer.isDown) {
                     this.shoot(time)
+                }
+                else if (this.shootStraightKey.isDown) {
+                    this.shootStraight(time)
                 }
                 break
             default:

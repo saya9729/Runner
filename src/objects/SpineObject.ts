@@ -3,12 +3,13 @@ export class SpineObject {
     spine: SpineGameObject
     body: Phaser.Physics.Arcade.Body// | Phaser.Physics.Arcade.StaticBody | MatterJS.BodyType
     private scale: number
+    flipX: boolean
     constructor(scene: Phaser.Scene, x: number, y: number, key?: string, animationName?: string, loop?: boolean) {
         this.scene = scene
         this.spine = scene.add.spine(x, y, key, animationName, loop)
 
         this.scale = 1
-
+        this.flipX = false
         //@ts-ignore
         this.scene.physics.add.existing(this.spine)//combine
         this.body = this.spine.body as Phaser.Physics.Arcade.Body
@@ -23,6 +24,7 @@ export class SpineObject {
     }
 
     setFlipX(flip: boolean) {
+        this.flipX = flip
         if (flip) {
             this.body.setOffset(this.spine.width, 0)
             this.spine.setScale(-this.scale, this.scale)
