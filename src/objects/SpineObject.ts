@@ -13,10 +13,13 @@ export class SpineObject {
         this.scene.physics.add.existing(this.spine)//combine
         this.body = this.spine.body as Phaser.Physics.Arcade.Body
 
+        const bounds = this.spine.getBounds()
+
         // future project decoupling spine and body
         //@ts-ignore
         //this.scene.add.existing(this.spine)
         //this.scene.physics.world.enable(this.boy)
+        //this.setPhysicsSize(bounds.size.x,bounds.size.y)
     }
 
     setFlipX(flip: boolean) {
@@ -29,8 +32,15 @@ export class SpineObject {
         }
     }
 
-    setScale(scale:number){
-        this.scale=scale
+    setScale(scale: number) {
+        this.scale = scale
         this.spine.setScale(scale)
+        //this.setPhysicsSize(bounds.size.x*scale,bounds.size.y*scale)
+    }
+
+    setPhysicsSize(width: number, height: number) {
+        //const body = this.body as Phaser.Physics.Arcade.Body
+        //this.body.setOffset(width * -0.5, -height)
+        this.body.setSize(width, height)
     }
 }

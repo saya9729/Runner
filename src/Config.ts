@@ -3,9 +3,9 @@ import { GamePlayScene } from './scenes/GamePlayScene'
 import { GameUIScene } from './scenes/GameUIScene'
 import 'phaser/plugins/spine/dist/SpinePlugin'
 export const GameConfig: Phaser.Types.Core.GameConfig = {
-  title: 'Mario',
-  width: 3000,
-  height: 3000,
+  title: 'Runner',
+  width: 1920,
+  height: 1080,
   type: Phaser.AUTO,
   scene: [
     PreloadScene,
@@ -19,10 +19,10 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
     }
   },
   pixelArt: true,
-  transparent: true,
-  scale:{
-    zoom: 0.5
-  },
+  //transparent: true,
+  // scale:{
+  //   zoom: 0.5
+  // },
   plugins: {
     scene: [
       {
@@ -31,5 +31,6 @@ export const GameConfig: Phaser.Types.Core.GameConfig = {
         mapping: 'spine'
       }
     ]
-  }
+  },
+  backgroundColor: 0x4ab2ed
 };

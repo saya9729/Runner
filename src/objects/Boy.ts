@@ -1,9 +1,12 @@
 import { SpineObject } from "./SpineObject"
 import { Constants } from "./Constants"
 import { State } from "./State"
+import { Bullet } from "./Bullet"
 export class Boy extends SpineObject {
     cursors: Phaser.Types.Input.Keyboard.CursorKeys
     state: State
+    bullets: Phaser.GameObjects.Group
+    lastShotTime: number
     constructor(scene: Phaser.Scene, x: number, y: number, key?: string, animationName?: string, loop?: boolean) {
         super(scene, x, y, key, animationName, loop)
 
@@ -20,8 +23,35 @@ export class Boy extends SpineObject {
         //Control
         this.initControl()
 
-        this.spine.play('run', true, true)
+        //Bullet group
+        this.initBullet()
 
+        this.spine.play('idle', true, true)
+
+        //this.body.setVelocityX(Constants.Boy.runSpeed)
+
+    }
+
+    initBullet(){
+        this.lastShotTime=this.scene.time.now
+
+        this.bullets=this.scene.physics.add.group({
+            classType:Bullet
+        })
+        // {
+        //     classType:Bullet,
+        //     maxSize:Constants.Boy.maxBullet
+        // })
+
+        // this.bullets.createMultiple({
+        //     classType:Bullet,
+        //     key:'texture',
+        //     frame:'syringe.png',
+        //     quantity:Constants.Boy.maxBullet,
+        //     //visible:true,
+        //     //active:false,
+        //     setDepth:{value:1}
+        // })
     }
 
     initControl() {
@@ -29,16 +59,16 @@ export class Boy extends SpineObject {
     }
     initPhysics() {
         //@ts-ignore
-        this.body.setGravityY(Constants.Boy.gravityY).setCollideWorldBounds()//.setSize(23,23)
+        this.body.setGravityY(Constants.Boy.gravityY).setCollideWorldBounds()
     }
 
     jumpUp() {
         //@ts-ignore
-        this.scene.midgroundLayerCollider.active = false
-        this.scene.time.delayedCall(Constants.Platform.colliderDisableTime, () => {
-            //@ts-ignore
-            this.scene.midgroundLayerCollider.active = true
-        })
+        // this.scene.midgroundLayerCollider.active = false
+        // this.scene.time.delayedCall(Constants.Platform.colliderDisableTime, () => {
+        //     //@ts-ignore
+        //     this.scene.midgroundLayerCollider.active = true
+        // })
         //@ts-ignore
         this.body.setVelocityY(-Constants.Boy.jumpSpeed)
 
@@ -46,19 +76,19 @@ export class Boy extends SpineObject {
     }
 
     goLeft(delta:number) {
-        // //@ts-ignore
-        // this.body.setVelocityX(-Constants.Boy.runSpeed)
+        //@ts-ignore
+        this.body.setVelocityX(-Constants.Boy.runSpeed)
 
         //@ts-ignore
-        this.scene.groundLayer.x+=Constants.Boy.runSpeed*delta/1000
+        //this.scene.groundLayer.x+=Constants.Boy.runSpeed*delta/1000
         //@ts-ignore
-        this.scene.midgroundLayer.x+=Constants.Boy.runSpeed*delta/1000
+        //this.scene.midgroundLayer.x+=Constants.Boy.runSpeed*delta/1000
         //@ts-ignore
-        this.scene.background.tilePositionX-=Constants.Boy.runSpeed*delta/1000/this.scene.background.scale
+        //this.scene.background.tilePositionX-=Constants.Boy.runSpeed*delta/1000/this.scene.background.scale
         //@ts-ignore
-        this.scene.viruses.getChildren().forEach(virus=>{
-            virus.x+=Constants.Boy.runSpeed*delta/1000
-        })
+        // this.scene.viruses.getChildren().forEach(virus=>{
+        //     virus.x+=Constants.Boy.runSpeed*delta/1000
+        // })
 
         //@ts-ignore
         if (this.body.onFloor()) {
@@ -70,19 +100,19 @@ export class Boy extends SpineObject {
 
 
     goRight(delta:number) {
-        // //@ts-ignore
-        // this.body.setVelocityX(Constants.Boy.runSpeed)
+        //@ts-ignore
+        this.body.setVelocityX(Constants.Boy.runSpeed)
 
         //@ts-ignore
-        this.scene.groundLayer.x-=Constants.Boy.runSpeed*delta/1000
+        //this.scene.groundLayer.x-=Constants.Boy.runSpeed*delta/1000
         //@ts-ignore
-        this.scene.midgroundLayer.x-=Constants.Boy.runSpeed*delta/1000
+        //this.scene.midgroundLayer.x-=Constants.Boy.runSpeed*delta/1000
         //@ts-ignore
-        this.scene.background.tilePositionX+=Constants.Boy.runSpeed*delta/1000/this.scene.background.scale
+        //this.scene.background.tilePositionX+=Constants.Boy.runSpeed*Constants.background.paralax*delta/1000/this.scene.background.scale
         //@ts-ignore
-        this.scene.viruses.getChildren().forEach(virus=>{
-            virus.x-=Constants.Boy.runSpeed*delta/1000
-        })
+        // this.scene.viruses.getChildren().forEach(virus=>{
+        //     virus.x-=Constants.Boy.runSpeed*delta/1000
+        // })
         //@ts-ignore
         if (this.body.onFloor()) {
 
@@ -93,14 +123,38 @@ export class Boy extends SpineObject {
 
     dropDown() {
         //@ts-ignore
-        this.scene.midgroundLayerCollider.active = false
-        this.scene.time.delayedCall(Constants.Platform.colliderDisableTime, () => {
-            //@ts-ignore
-            this.scene.midgroundLayerCollider.active = true
-        })
+        // this.scene.midgroundLayerCollider.active = false
+        // this.scene.time.delayedCall(Constants.Platform.colliderDisableTime, () => {
+        //     //@ts-ignore
+        //     this.scene.midgroundLayerCollider.active = true
+        // })
         this.body.setVelocityY(Constants.Boy.dropDownSpeed)
 
         this.spine.play('jump', true, true)
+    }
+
+    shoot(time:number){
+        if (time-this.lastShotTime>=1000/Constants.Boy.rateOfFire){
+            this.lastShotTime=time
+            var bullet=this.bullets.get(this.body.x,this.body.y,'texture','syringe.png')
+            if (bullet){
+                bullet.reset(this.body.x+this.body.width*Constants.Boy.gunOffset.x,this.body.y+this.body.width*Constants.Boy.gunOffset.y)
+                if(this.body.x<=this.scene.input.activePointer.worldX){
+                    this.setFlipX(false)
+                }
+                else{
+                    this.setFlipX(true)
+                }
+                bullet.shoot({
+                    x:this.scene.input.activePointer.worldX,
+                    y:this.scene.input.activePointer.worldY
+                })
+            }
+        }
+    }
+
+    infected(){
+        console.log('infected')
     }
 
     update(time:number,delta:number) {
@@ -120,9 +174,12 @@ export class Boy extends SpineObject {
                 if (this.cursors.up.isDown && this.body.onFloor()) {
                     this.jumpUp()
                 }
-                else if (this.cursors.down.isDown && this.body.onFloor()) {
-                    this.dropDown()
-                }
+                // else if (this.body.onFloor()){
+                //     this.spine.play('run',true,true)
+                // }
+                // else if (this.cursors.down.isDown && this.body.onFloor()) {
+                //     this.dropDown()
+                // }
                 if (this.cursors.left.isDown) {
                     this.goLeft(delta)
                 }
@@ -132,6 +189,9 @@ export class Boy extends SpineObject {
                 else {
                     //@ts-ignore
                     this.body.setVelocityX(0)
+                }
+                if (this.scene.input.activePointer.isDown){
+                    this.shoot(time)
                 }
                 break
             default:
