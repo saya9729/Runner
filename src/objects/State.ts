@@ -2,5 +2,6 @@ export enum State{
     Run='Run',
     Climb='Climb',
     Fly='Fly',
-    Swim='Swim'
+    Swim='Swim',
+    Dead='Dead'
 }

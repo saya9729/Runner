@@ -12,7 +12,8 @@ export const Constants = {
         gunOffset:{
             x:1,
             y:0.5
-        }
+        },
+        initialHealth:3
     },
     Platform:{
         colliderDisableTime:200
@@ -26,7 +27,7 @@ export const Constants = {
     },
     UI:{
         virusFont:100,
-        scoreFont:100,
+        healthFont:100,
     },
     background:{
         paralax:0.5,

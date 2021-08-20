@@ -10,8 +10,7 @@ export class Bullet extends Phaser.GameObjects.Image {
         this.body.onWorldBounds = true
         this.body.world.on('worldbounds', (body: any) => {
             if (body.gameObject === this) {
-                this.disappear()
-                //console.log('disable')
+                this.disappear()                
             }
         }, this)
     }
@@ -25,23 +24,25 @@ export class Bullet extends Phaser.GameObjects.Image {
     shootStraight(direction: string) {
         switch (direction) {
             case 'left':
-                this.setRotation(Phaser.Math.PI2/2)
+                //this.setRotation(Phaser.Math.PI2/2)
+                this.setFlipX(true)
                 this.body.setVelocityX(-Constants.Boy.bulletSpeed)
                 break
             default:
-                this.setRotation(0)
+                //this.setRotation(0)
+                this.setFlipX(false)
                 this.body.setVelocityX(Constants.Boy.bulletSpeed)
                 break
         }
     }
 
-    reset(x: number, y: number) {
-        this.setVisible(true)
-        this.x = x
-        this.y = y
+    reset() {
+        this.setActive(true)
+            .setVisible(true)
     }
 
     disappear() {
+        //console.log('disappear')
         this.setActive(false)
             .setVisible(false)
     }

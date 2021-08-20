@@ -1,1 +1,0 @@
-export const gameEvents=new Phaser.Events.EventEmitter()

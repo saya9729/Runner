@@ -1,8 +1,9 @@
-import { gameEvents } from "../event_handler/EventHandler"
+import { gameEvents } from "../event_handler/EventEmitter"
 import { Boy } from "../objects/Boy"
 import { Bullet } from "../objects/Bullet"
 import { Constants } from "../objects/Constants"
 import { Virus } from "../objects/Virus"
+import { EventHandler } from "../objects/EventHandler"
 // const PROCESSING = {
 //     '1-tree-cut2': saveFallingTree,
 //     '1-tree3': updateTreeBody,
@@ -76,6 +77,81 @@ import { Virus } from "../objects/Virus"
 //     'o-ufo': processUfo,
 //     'o-ray': processRay
 // }
+
+const EventHandlerList = {
+    // // Level 0
+    // '0-load': Level0.preloadLevel,
+    // '0-checkpoint0': Level0.checkpoint0,
+    // '0-title': Level0.showTitle,
+    // // Level 1
+    // '1-load': Level1.preloadLevel,
+    // '1-checkpoint1': Level1.checkpoint1,
+    // '1-title': Level1.showTitle,
+    // '1-checkpoint2': Level1.checkpoint2,
+    // '1-wildfires': Level1.startWildfires,
+    // '1-tree-falls': Level1.treeFalls,
+    // '1-koala-jumps': Level1.koalaJumps,
+    // '1-clear': Level1.clear,
+    // // Level 2
+    // '2-load': Level2.preloadLevel,
+    // '2-checkpoint3': Level2.checkpoint3,
+    // '2-bat': Level2.addFlyingBat,
+    // '2-quarantine-ready': Level2.showQuarantineTitle,
+    // '2-clear': Level2.clear,
+    // // Level 3
+    // '3-load': Level3.preloadLevel,
+    // '3-checkpoint4': Level3.checkpoint4,
+    // '3-title': Level3.showTitle,
+    // '3-checkpoint5': Level3.checkpoint5,
+    // '3-google': Level3.stockGoogle,
+    // '3-amazon': Level3.stockAmazon,
+    // '3-microsoft': Level3.stockMicrosoft,
+    // '3-facebook': Level3.stockFacebook,
+    // '3-apple': Level3.stockApple,
+    // '3-checkpoint6': Level3.checkpoint6,
+    // '3-quarantine': Level3.startQuarantine,
+    // '3-resume-music': Level3.resumeMusic,
+    // // Level 4
+    // '4-load': Level4.preloadLevel,
+    // '4-checkpoint7': Level4.checkpoint7,
+    // '4-title': Level4.showTitle,
+    // '4-smog': Level4.fadeOutSmog,
+    // '4-dolphins': Level4.addDolphins,
+    // '4-checkpoint8': Level4.checkpoint8,
+    // '4-checkpoint9': Level4.checkpoint9,
+    // '4-clear': Level4.clear,
+    // // Level 5
+    // '5-load': Level5.preloadLevel,
+    // '5-checkpoint10': Level5.checkpoint10,
+    // '5-checkpoint11': Level5.checkpoint11,
+    // '5-5G-start': Level5.startCoronaGeneration,
+    // '5-5G-stop': Level5.stopCoronaGeneration,
+    // '5-checkpoint12': Level5.checkpoint12,
+    // '5-clear': Level5.clear,
+    // // Level 6
+    // '6-load': Level6.preloadLevel,
+    // '6-checkpoint13': Level6.checkpoint13,
+    // '6-floods': Level6.floodsTitle,
+    // '6-checkpoint14': Level6.checkpoint14,
+    // '6-race': Level6.raceTitle,
+    // '6-race1': () => Level6.startRace(),
+    // '6-race2': () => Level6.bidenLeads(),
+    // '6-race3': () => Level6.trumpLeads(),
+    // '6-race4': () => Level6.bidenNitro(),
+    // '6-clear': Level6.clear,
+    // // Level 7
+    // '7-load': Level7.preloadLevel,
+    // '7-checkpoint15': Level7.checkpoint15,
+    // '7-title': Level7.showTitle,
+    // '7-attack-start': Level7.startCorona,
+    // '7-attack-stop': Level7.removeCorona,
+    // '7-reset': Level7.removeSyringe,
+    // '7-game-win': Level7.gameWin,
+    // '7-clear': Level7.clear,
+    // // Outro
+    // 'o-load': Outro.preloadLevel
+    'o-load': EventHandler.gameOver
+}
 export class GamePlayScene extends Phaser.Scene {
     player: Boy
     map: Phaser.Tilemaps.Tilemap
@@ -92,6 +168,8 @@ export class GamePlayScene extends Phaser.Scene {
     score: number
     virusesCollected: number
     groundGroup: Phaser.Physics.Arcade.StaticGroup
+    timelineEvents: { x: number | undefined; name: string }[]
+    currentEventIndex: number
     constructor() {
         super('GamePlayScene')
     }
@@ -108,8 +186,8 @@ export class GamePlayScene extends Phaser.Scene {
             true
         )
 
-        this.score = 0
-        this.registry.set('score', this.score)
+        //this.score = 0
+        //this.registry.set('score', this.score)
         this.virusesCollected = 0
         this.registry.set('viruses_collected', this.virusesCollected)
 
@@ -119,7 +197,7 @@ export class GamePlayScene extends Phaser.Scene {
         //camera later
         this.cameras.main.startFollow(this.player.spine, true)
         //this.cameras.main.setLerp(1,0)
-        this.physics.world.setBoundsCollision(true, false, false, true)
+        //this.physics.world.setBoundsCollision()
 
         //collider
         this.initCollider()
@@ -323,6 +401,38 @@ export class GamePlayScene extends Phaser.Scene {
         //     this.viruses.create(newVirus.x! + newVirus.width! / 2, newVirus.y! - newVirus.height! / 2, 'texture', 'corona.png')
         // })
 
+        // Fill events from the map and sort by X position
+        this.timelineEvents = this.map.getObjectLayer('events').objects.map(event => ({
+            x: event.x,
+            name: event.name
+        })).sort((e1, e2) => e1.x! - e2.x!)
+
+        this.currentEventIndex = 0
+
+        // Update camera and world bounds
+        this.cameras.main.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
+        this.physics.world.setBounds(0, 0, this.map.widthInPixels, this.map.heightInPixels)
+
+    }
+    checkTimeline() {
+        if (this.currentEventIndex >= this.timelineEvents.length) { return }
+
+        if (this.timelineEvents[this.currentEventIndex].x! <= this.player.body.x) {
+            let currentEvent = this.timelineEvents[this.currentEventIndex].name
+            // Handle
+            this.handleEvent(currentEvent)
+            // Move to next event
+            this.currentEventIndex++
+        }
+    }
+
+    handleEvent(event: string) {
+        if (event in EventHandlerList) {
+            //@ts-ignore
+            EventHandlerList[event]()
+        } else {
+            console.log(`${event} event handler not found`)
+        }
     }
 
     addMapImage(image: any) {
@@ -381,7 +491,8 @@ export class GamePlayScene extends Phaser.Scene {
         let player = obj1 as Boy
         let virus = obj2 as Virus
 
-        //player.infected()
+        //@ts-ignore
+        player.scene.player.infected()
         virus.disappear()
     }
 
@@ -399,6 +510,8 @@ export class GamePlayScene extends Phaser.Scene {
         //this.player.update()
         this.player.update(time, delta)
         //this.increaseScore(delta)
+
+        this.checkTimeline()
 
         //this.gameTime -= delta / 1000
         //gameEvents.emit('game_time_changed', this.gameTime)

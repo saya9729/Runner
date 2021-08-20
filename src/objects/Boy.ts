@@ -2,16 +2,21 @@ import { SpineObject } from "./SpineObject"
 import { Constants } from "./Constants"
 import { State } from "./State"
 import { Bullet } from "./Bullet"
+import { gameEvents } from "../event_handler/EventEmitter"
 export class Boy extends SpineObject {
     cursors: Phaser.Types.Input.Keyboard.CursorKeys
     state: State
     bullets: Phaser.GameObjects.Group
     lastShotTime: number
     shootStraightKey: Phaser.Input.Keyboard.Key
+    health: number
     constructor(scene: Phaser.Scene, x: number, y: number, key?: string, animationName?: string, loop?: boolean) {
         super(scene, x, y, key, animationName, loop)
 
         this.state = State.Run
+
+        this.health = Constants.Boy.initialHealth
+        this.scene.registry.set('health', this.health)
 
         this.spine
             .setDepth(Constants.Boy.depth)
@@ -140,9 +145,9 @@ export class Boy extends SpineObject {
     shoot(time: number) {
         if (time - this.lastShotTime >= 1000 / Constants.Boy.rateOfFire) {
             this.lastShotTime = time
-            var bullet = this.bullets.get(this.body.x, this.body.y, 'texture', 'syringe.png')
+            var bullet = this.bullets.get(this.body.x + this.body.width * Constants.Boy.gunOffset.x, this.body.y + this.body.width * Constants.Boy.gunOffset.y, 'texture', 'syringe.png')
             if (bullet) {
-                bullet.reset(this.body.x + this.body.width * Constants.Boy.gunOffset.x, this.body.y + this.body.width * Constants.Boy.gunOffset.y)
+                bullet.reset()
                 if (this.body.x <= this.scene.input.activePointer.worldX) {
                     this.setFlipX(false)
                 }
@@ -158,15 +163,25 @@ export class Boy extends SpineObject {
     }
 
     infected() {
-        console.log('infected')
+        if (this.health > 0) {
+            //console.log('infected')
+            this.health -= 1
+            this.scene.registry.set('health', this.health)
+            gameEvents.emit('health_changed')
+        }
+        else {
+            //console.log('You Died')
+            this.state = State.Dead
+            this.spine.play('death', false, true)
+        }
     }
 
     shootStraight(time: number) {
         if (time - this.lastShotTime >= 1000 / Constants.Boy.rateOfFire) {
             this.lastShotTime = time
-            var bullet = this.bullets.get(this.body.x, this.body.y, 'texture', 'syringe.png')
+            var bullet = this.bullets.get(this.body.x + this.body.width * Constants.Boy.gunOffset.x, this.body.y + this.body.width * Constants.Boy.gunOffset.y, 'texture', 'syringe.png')
             if (bullet) {
-                bullet.reset(this.body.x + this.body.width * Constants.Boy.gunOffset.x, this.body.y + this.body.width * Constants.Boy.gunOffset.y)
+                bullet.reset()
                 switch (this.flipX) {
                     case true:
                         bullet.shootStraight('left')
@@ -219,6 +234,9 @@ export class Boy extends SpineObject {
                     this.shootStraight(time)
                 }
                 break
+            case State.Dead:
+                //@ts-ignore
+                this.body.setVelocityX(0)
             default:
                 break
         }
