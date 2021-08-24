@@ -3,14 +3,15 @@ import { Constants } from "./Constants"
 import { State } from "./State"
 import { Bullet } from "./Bullet"
 import { gameEvents } from "../event_handler/EventEmitter"
-export class Boy extends SpineObject {
+import SpineObjectContainer from "./SpineObjectContainer"
+export class Boy extends SpineObjectContainer {
     cursors: Phaser.Types.Input.Keyboard.CursorKeys
     state: State
     bullets: Phaser.GameObjects.Group
     lastShotTime: number
     shootStraightKey: Phaser.Input.Keyboard.Key
     health: number
-    constructor(scene: Phaser.Scene, x: number, y: number, key?: string, animationName?: string, loop?: boolean) {
+    constructor(scene: Phaser.Scene, x: number, y: number, key: string, animationName: string, loop: boolean) {
         super(scene, x, y, key, animationName, loop)
 
         this.state = State.Run
@@ -182,7 +183,7 @@ export class Boy extends SpineObject {
             var bullet = this.bullets.get(this.body.x + this.body.width * Constants.Boy.gunOffset.x, this.body.y + this.body.width * Constants.Boy.gunOffset.y, 'texture', 'syringe.png')
             if (bullet) {
                 bullet.reset()
-                switch (this.flipX) {
+                switch (this.spine.scaleX==-1) {
                     case true:
                         bullet.shootStraight('left')
                         break

@@ -195,7 +195,7 @@ export class GamePlayScene extends Phaser.Scene {
         this.initMapLayer()
 
         //camera later
-        this.cameras.main.startFollow(this.player.spine, true)
+        this.cameras.main.startFollow(this.player)
         //this.cameras.main.setLerp(1,0)
         //this.physics.world.setBoundsCollision()
 

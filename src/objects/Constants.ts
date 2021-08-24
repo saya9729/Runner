@@ -4,16 +4,19 @@ export const Constants = {
         jumpSpeed: 700,
         scale: 0.2,
         gravityY: 1000,
-        dropDownSpeed:200,
+        //dropDownSpeed:200,
         depth:1,
         rateOfFire:2,
-        maxBullet:100,
-        bulletSpeed:999,
+        //maxBullet:100,        
         gunOffset:{
             x:1,
             y:0.5
         },
         initialHealth:3
+    },
+    Bullet:{
+        fadeTime:1500,
+        bulletSpeed:999
     },
     Platform:{
         colliderDisableTime:200
