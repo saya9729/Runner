@@ -1,8 +1,9 @@
 declare global {
     interface ISpineObjectContainer extends Phaser.GameObjects.Container {
         readonly spine: SpineGameObject
-        faceDirection(dir: 1 | -1): void
+        //faceDirection(dir: 1 | -1): void
         setPhysicsSize(width: number, height: number): void
+        setFlipX(flip: boolean):void
     }
 }
 
@@ -26,13 +27,13 @@ export default class SpineObjectContainer extends Phaser.GameObjects.Container i
         this.add(this.spine)
     }
 
-    faceDirection(dir: 1 | -1) {
-        if (this.spine.scaleX === dir) {
-            return
-        }
+    // faceDirection(dir: 1 | -1) {
+    //     if (this.spine.scaleX === dir) {
+    //         return
+    //     }
 
-        this.spine.scaleX = dir
-    }
+    //     this.spine.scaleX = dir
+    // }
 
     setFlipX(flip: boolean) {
         if (flip) {
@@ -42,9 +43,8 @@ export default class SpineObjectContainer extends Phaser.GameObjects.Container i
         }
     }
 
-    setPhysicsSize(width: number, height: number) {
-        //const body = this.body as Phaser.Physics.Arcade.Body
-        this.body.setOffset(width * -0.5, -height)//Spine origin at (0.5, 1) bring basck to (0, 0)
+    setPhysicsSize(width: number, height: number) {        
+        this.body.setOffset(width * -0.5, -height)// Spine origin at (0.5, 1), bring back to (0, 0)
         this.body.setSize(width, height)        
     }
 }

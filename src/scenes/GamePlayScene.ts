@@ -507,16 +507,9 @@ export class GamePlayScene extends Phaser.Scene {
         if (this.player.body.onFloor()) {
             this.cameras.main.setLerp(1, 0)
         }
-        //this.player.update()
+        
         this.player.update(time, delta)
-        //this.increaseScore(delta)
 
         this.checkTimeline()
-
-        //this.gameTime -= delta / 1000
-        //gameEvents.emit('game_time_changed', this.gameTime)
-        // this.goombas.getChildren().forEach(goomba=>{
-        //     goomba.update()
-        // })
     }
 }

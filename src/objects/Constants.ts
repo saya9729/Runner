@@ -30,7 +30,14 @@ export const Constants = {
     },
     UI:{
         virusFont:100,
+        virusTextPositionX:100,
+        virusTextPositionY:200,
+        virusImagePositionX:70,
+        virusImagePositionY:240,
+
         healthFont:100,
+        healthTextPositionX:100,
+        healthTextPositionY:100,
     },
     background:{
         paralax:0.5,

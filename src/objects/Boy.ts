@@ -1,4 +1,3 @@
-import { SpineObject } from "./SpineObject"
 import { Constants } from "./Constants"
 import { State } from "./State"
 import { Bullet } from "./Bullet"
@@ -34,9 +33,6 @@ export class Boy extends SpineObjectContainer {
         this.initBullet()
 
         this.spine.play('idle', true, true)
-
-        //this.body.setVelocityX(Constants.Boy.runSpeed)
-
     }
 
     initBullet() {
@@ -44,21 +40,7 @@ export class Boy extends SpineObjectContainer {
 
         this.bullets = this.scene.physics.add.group({
             classType: Bullet
-        })
-        // {
-        //     classType:Bullet,
-        //     maxSize:Constants.Boy.maxBullet
-        // })
-
-        // this.bullets.createMultiple({
-        //     classType:Bullet,
-        //     key:'texture',
-        //     frame:'syringe.png',
-        //     quantity:Constants.Boy.maxBullet,
-        //     //visible:true,
-        //     //active:false,
-        //     setDepth:{value:1}
-        // })
+        })        
     }
 
     initControl() {
@@ -72,13 +54,7 @@ export class Boy extends SpineObjectContainer {
         this.body.setGravityY(Constants.Boy.gravityY).setCollideWorldBounds()
     }
 
-    jumpUp() {
-        //@ts-ignore
-        // this.scene.midgroundLayerCollider.active = false
-        // this.scene.time.delayedCall(Constants.Platform.colliderDisableTime, () => {
-        //     //@ts-ignore
-        //     this.scene.midgroundLayerCollider.active = true
-        // })
+    jumpUp() {        
         //@ts-ignore
         this.body.setVelocityY(-Constants.Boy.jumpSpeed)
 
@@ -88,17 +64,6 @@ export class Boy extends SpineObjectContainer {
     goLeft(delta: number) {
         //@ts-ignore
         this.body.setVelocityX(-Constants.Boy.runSpeed)
-
-        //@ts-ignore
-        //this.scene.groundLayer.x+=Constants.Boy.runSpeed*delta/1000
-        //@ts-ignore
-        //this.scene.midgroundLayer.x+=Constants.Boy.runSpeed*delta/1000
-        //@ts-ignore
-        //this.scene.background.tilePositionX-=Constants.Boy.runSpeed*delta/1000/this.scene.background.scale
-        //@ts-ignore
-        // this.scene.viruses.getChildren().forEach(virus=>{
-        //     virus.x+=Constants.Boy.runSpeed*delta/1000
-        // })
 
         //@ts-ignore
         if (this.body.onFloor()) {
@@ -112,36 +77,14 @@ export class Boy extends SpineObjectContainer {
     goRight(delta: number) {
         //@ts-ignore
         this.body.setVelocityX(Constants.Boy.runSpeed)
-
-        //@ts-ignore
-        //this.scene.groundLayer.x-=Constants.Boy.runSpeed*delta/1000
-        //@ts-ignore
-        //this.scene.midgroundLayer.x-=Constants.Boy.runSpeed*delta/1000
-        //@ts-ignore
-        //this.scene.background.tilePositionX+=Constants.Boy.runSpeed*Constants.background.paralax*delta/1000/this.scene.background.scale
-        //@ts-ignore
-        // this.scene.viruses.getChildren().forEach(virus=>{
-        //     virus.x-=Constants.Boy.runSpeed*delta/1000
-        // })
+        
         //@ts-ignore
         if (this.body.onFloor()) {
 
             this.spine.play('run', true, true)
         }
         this.setFlipX(false)
-    }
-
-    dropDown() {
-        //@ts-ignore
-        // this.scene.midgroundLayerCollider.active = false
-        // this.scene.time.delayedCall(Constants.Platform.colliderDisableTime, () => {
-        //     //@ts-ignore
-        //     this.scene.midgroundLayerCollider.active = true
-        // })
-        this.body.setVelocityY(Constants.Boy.dropDownSpeed)
-
-        this.spine.play('jump', true, true)
-    }
+    }    
 
     shoot(time: number) {
         if (time - this.lastShotTime >= 1000 / Constants.Boy.rateOfFire) {
@@ -164,14 +107,12 @@ export class Boy extends SpineObjectContainer {
     }
 
     infected() {
-        if (this.health > 0) {
-            //console.log('infected')
+        if (this.health > 0) {            
             this.health -= 1
             this.scene.registry.set('health', this.health)
             gameEvents.emit('health_changed')
         }
-        else {
-            //console.log('You Died')
+        else {            
             this.state = State.Dead
             this.spine.play('death', false, true)
         }
@@ -204,20 +145,15 @@ export class Boy extends SpineObjectContainer {
                     this.spine.play('idle', true, true)
                 }
                 //@ts-ignore
-                // if (!this.body.onFloor()) {
-                //     
-                //     this.spine.play('jump', true, true)
-                // }
+                if (!this.body.onFloor()) {
+                    
+                    this.spine.play('jump', true, true)
+                }
                 //@ts-ignore
                 if (this.cursors.up.isDown && this.body.onFloor()) {
                     this.jumpUp()
                 }
-                // else if (this.body.onFloor()){
-                //     this.spine.play('run',true,true)
-                // }
-                // else if (this.cursors.down.isDown && this.body.onFloor()) {
-                //     this.dropDown()
-                // }
+                
                 if (this.cursors.left.isDown) {
                     this.goLeft(delta)
                 }
